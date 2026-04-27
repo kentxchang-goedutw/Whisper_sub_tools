@@ -51,13 +51,18 @@ ffmpeg -version
 
 請更新到本 repo 最新版 exe（此版本已把 VAD 模型資源納入打包）。
 
-### F.2 影片打不開 / 沒有聲音 / 報解碼錯誤
+### F.2 提示 `cublas64_12.dll is not found`
+
+這代表該電腦缺少 GPU/CUDA 需要的 NVIDIA runtime。新版程式會在 CUDA 載入失敗時自動改用 `CPU / int8` 繼續辨識，只是速度會比 GPU 慢。
+
+如果一定要用 GPU，請在該電腦安裝與目前 NVIDIA 驅動、`ctranslate2` 相容的 CUDA runtime，再重新啟動程式。
+
+### F.3 影片打不開 / 沒有聲音 / 報解碼錯誤
 
 優先安裝 ffmpeg 並加入 PATH，再重試。
 
-### F.3 公司網路擋模型下載
+### F.4 公司網路擋模型下載
 
 解法：
 - 先在可連線環境把模型跑過一次（完成下載）
 - 再把快取搬到目標機器（或同帳號下直接復用快取）
-

@@ -351,7 +351,22 @@ class WhisperSubtitleApp(ctk.CTk):
             language = str(config["language"])
 
             self.events.put(("status", f"使用 {device} / {compute_type} 載入 {model_name} 模型。"))
-            model = WhisperModel(model_name, device=device, compute_type=compute_type)
+            try:
+                model = WhisperModel(model_name, device=device, compute_type=compute_type)
+            except Exception as exc:
+                if device != "cuda" or not is_cuda_runtime_error(exc):
+                    raise
+
+                self.events.put(
+                    (
+                        "status",
+                        "CUDA runtime 缺少必要 DLL，已自動改用 CPU / int8。若要用 GPU，請安裝相容的 NVIDIA CUDA runtime。",
+                    )
+                )
+                device = "cpu"
+                compute_type = "int8"
+                model = WhisperModel(model_name, device=device, compute_type=compute_type)
+
             vad_enabled = package_available("onnxruntime")
             if not vad_enabled:
                 self.events.put(("status", "未偵測到 onnxruntime，已關閉 VAD 靜音過濾。"))
@@ -550,6 +565,21 @@ def resolve_compute_type(device: str, requested: str) -> str:
     if device == "cpu":
         return "int8"
     return requested or "float16"
+
+
+def is_cuda_runtime_error(exc: Exception) -> bool:
+    text = str(exc).lower()
+    markers = [
+        "cublas64",
+        "cudnn",
+        "cudart",
+        "cuda",
+        "library",
+        "dll",
+        "not found",
+        "cannot be loaded",
+    ]
+    return any(marker in text for marker in markers)
 
 
 def rebuild_segments(chunks: list[dict[str, Any]], mode: str) -> list[dict[str, Any]]:

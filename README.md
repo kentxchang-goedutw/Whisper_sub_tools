@@ -45,26 +45,33 @@
 
 請確認你使用的是本 repo 最新的 `SubtitleTool.exe`。此專案已把 `silero_vad_v6.onnx` 連同 exe 一起打包。
 
-### 4.2 找不到 ffmpeg
+### 4.2 缺少 `cublas64_12.dll`
+
+若出現類似：
+`Library cublas64_12.dll is not found or cannot be loaded`
+
+代表該電腦缺少 GPU/CUDA 需要的 NVIDIA runtime。新版程式會在 CUDA 載入失敗時自動改用 `CPU / int8` 繼續辨識；如果一定要用 GPU，請在該電腦安裝相容的 CUDA runtime。
+
+### 4.3 找不到 ffmpeg
 
 如果「檢查環境」顯示 `ffmpeg：未在 PATH 偵測到`：
 - 建議安裝 ffmpeg 並加入系統 PATH，再重新開啟程式。
 - 若你只在 GUI 裡辨識一般媒體，多數情境下 PyAV 仍能工作，但遇到特殊封裝/編碼時仍建議裝 ffmpeg 以提升相容性。
 
-### 4.3 第一次辨識很久、或卡在下載
+### 4.4 第一次辨識很久、或卡在下載
 
 第一次用某個模型會下載模型檔：
 - 確認網路可連線（公司網路可能封鎖）
 - 換小模型先測試（例如 `base` 或 `small`）
 - 改用可連線環境先跑一次，下載完成後再帶回離線環境使用
 
-### 4.4 CUDA/GPU 無法用
+### 4.5 CUDA/GPU 無法用
 
 「檢查環境」顯示 CUDA 裝置數為 0 時：
 - 先用 CPU 模式可正常工作（較慢）
 - 要用 GPU 需符合你的 NVIDIA 驅動與 CUDA/相關 runtime 相容條件（取決於你安裝的 `ctranslate2`/`onnxruntime` 版本與硬體）
 
-### 4.5 防毒軟體誤判
+### 4.6 防毒軟體誤判
 
 PyInstaller 打包的 exe 在部分環境可能被誤判：
 - 建議從可信任來源下載
@@ -95,4 +102,3 @@ python .\app.py
 說明：
 - 會先用 `tools/make_icon.py` 產生 `assets/app_icon.ico`，再用 PyInstaller 依照 `subtitle_tool.spec` 打包。
 - 為避免中文路徑造成 PyInstaller 在 Windows 建置時出錯，打包會在 `%TEMP%` 的 ASCII 路徑完成後再把 exe 複製回本專案的 `dist/`。
-
